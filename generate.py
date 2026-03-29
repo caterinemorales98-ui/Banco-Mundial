@@ -34,7 +34,7 @@ def ask(prompt):
         print("⚠ Sin API key de Gemini")
         return {"text": "Sin API key configurada.", "sources": []}
     import time
-    time.sleep(4)  # pause to avoid rate limiting
+    time.sleep(10)  # pause 10s to respect 10 RPM limit
     try:
         body = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
@@ -60,6 +60,26 @@ def ask(prompt):
                 seen.add(url)
         return {"text": text, "sources": sources}
     except Exception as e:
+        msg = str(e)
+        if "429" in msg:
+            print(f"  429 rate limit - esperando 30s y reintentando...")
+            import time
+            time.sleep(30)
+            try:
+                r2 = requests.post(URL, json=body, timeout=60)
+                r2.raise_for_status()
+                d2 = r2.json()
+                parts2 = d2.get("candidates",[{}])[0].get("content",{}).get("parts",[])
+                text2 = "".join(p.get("text","") for p in parts2).replace("**","").replace("*","").strip()
+                sources2 = []
+                for ch in d2.get("candidates",[{}])[0].get("groundingMetadata",{}).get("groundingChunks",[]):
+                    w = ch.get("web",{})
+                    if w.get("uri") and w.get("title"):
+                        sources2.append({"title":w["title"],"url":w["uri"]})
+                return {"text": text2, "sources": sources2}
+            except Exception as e2:
+                print(f"Error Gemini reintento: {e2}")
+                return {"text": f"Sin datos disponibles en este momento.", "sources": []}
         print(f"Error Gemini: {e}")
         return {"text": f"Error al consultar Gemini: {e}", "sources": []}
  
