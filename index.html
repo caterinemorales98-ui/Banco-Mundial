@@ -18,7 +18,7 @@
   --mono:'JetBrains Mono','Courier New',monospace;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14px;display:flex;height:100vh;overflow:hidden}
-
+ 
 /* SIDEBAR */
 .sb{width:210px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
 .sb::-webkit-scrollbar{width:3px}.sb::-webkit-scrollbar-thumb{background:#374151}
@@ -48,7 +48,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .sb-footer p{font-size:10px;color:#4b5563;line-height:1.7;font-family:var(--mono)}
 .sb-footer b{color:#6b7280}
 .sb-ts{font-size:10px;color:#34d399;font-family:var(--mono);margin-top:6px}
-
+ 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{background:white;border-bottom:1px solid var(--g200);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
@@ -59,7 +59,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .timer-chip{display:flex;align-items:center;gap:6px;background:var(--g100);border:1px solid var(--g200);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--g500);font-family:var(--mono)}
 .tbar{width:60px;height:3px;background:var(--g200);border-radius:2px;overflow:hidden}
 .tfill{height:100%;background:#3b82f6;border-radius:2px;transition:width 1s linear}
-
+ 
 /* PAGES */
 .page{display:none;flex:1;overflow-y:auto}
 .page.active{display:block}
@@ -68,7 +68,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .ph h2{font-size:20px;font-weight:700;color:var(--g900)}
 .ph p{font-size:11px;color:var(--g400);margin-top:2px;font-family:var(--mono)}
 .ph a{font-size:12px;color:var(--blue);cursor:pointer;text-decoration:none}
-
+ 
 /* KPI */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
 .kpi{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px}
@@ -76,7 +76,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .kpi-v.red{color:var(--red)} .kpi-v.amber{color:var(--amber)} .kpi-v.green{color:var(--green)} .kpi-v.blue{color:var(--blue)}
 .kpi-l{font-size:11px;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .kpi-s{font-size:11px;color:var(--g500);margin-top:4px}
-
+ 
 /* RISK CARDS */
 .rc-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
 .rc{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;text-decoration:none;display:block}
@@ -87,7 +87,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .rc-level.med{background:var(--bbg);color:var(--blue);border:1px solid var(--bborder)}
 .rc h3{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:6px}
 .rc p{font-size:12px;color:var(--g500);line-height:1.5}
-
+ 
 /* NEWS CARDS */
 .nb.crit{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}
 .nb.alto{background:var(--abg);color:var(--amber);border:1px solid var(--aborder)}
@@ -110,31 +110,31 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .nc-loc{font-size:11px;color:var(--g400)}
 .nc-date{font-size:11px;color:var(--g400);font-family:var(--mono)}
 .nc-src{font-size:11px;font-weight:600;color:var(--blue)}
-
+ 
 /* SOURCES */
 .sources{margin-top:14px;padding-top:12px;border-top:1px solid var(--g100)}
 .src-label{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;font-family:var(--mono)}
 .src-link{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--g100);border:1px solid var(--g200);border-radius:6px;margin-bottom:5px;text-decoration:none;color:var(--blue);font-size:12px;transition:all .12s}
 .src-link:hover{background:var(--bbg);border-color:var(--bborder)}
-
+ 
 /* FILTER BAR */
 .fbar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .fb{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--g300);background:white;color:var(--g600);transition:all .12s}
 .fb:hover{border-color:#93c5fd;color:var(--blue)}
 .fb.on{background:var(--blue);color:white;border-color:var(--blue)}
-
+ 
 /* AI BOX */
 .ai-box{background:white;border:1px solid var(--g200);border-radius:10px;margin-bottom:14px;overflow:hidden}
 .ai-top{padding:11px 18px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
 .ai-chip{font-size:10px;background:var(--blue);color:white;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-weight:700;letter-spacing:.04em}
 .ai-ts{font-size:10px;color:var(--g300);font-family:var(--mono)}
 .ai-body{padding:18px 20px;font-size:13px;color:var(--g700);line-height:1.8}
-
+ 
 /* LAYOUT */
 .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
 .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media(max-width:1000px){.two-col,.three-col,.kpi-row,.rc-row{grid-template-columns:1fr 1fr}}
-
+ 
 /* RISK MATRIX */
 .rmc{background:white;border:1px solid var(--g200);border-radius:10px;overflow:hidden;margin-bottom:12px}
 .rmc-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g100)}
@@ -142,7 +142,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .rmc-body{padding:12px 16px}
 .rmc-body p{font-size:13px;color:var(--g600);line-height:1.7;margin-bottom:6px}
 .rmc-country{font-size:11px;color:var(--g400);font-family:var(--mono)}
-
+ 
 /* COUNTRIES */
 .country-section{margin-bottom:28px}
 .country-hero{display:flex;align-items:center;gap:16px;background:white;border:1px solid var(--g200);border-radius:10px;padding:18px 20px;margin-bottom:14px}
@@ -154,7 +154,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .ctx-full{grid-column:1/-1}
 .ctx-box h4{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ctx-box p{font-size:13px;color:var(--g600);line-height:1.8}
-
+ 
 /* DATES */
 .di{background:white;border:1px solid var(--g200);border-left:4px solid transparent;border-radius:10px;padding:14px 16px;display:flex;gap:14px;margin-bottom:8px}
 .di.crit{border-left-color:var(--red)}
@@ -167,7 +167,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .di-title{font-size:13px;font-weight:600;color:var(--g900);margin-bottom:3px}
 .di-desc{font-size:12px;color:var(--g500);line-height:1.5;margin-bottom:5px}
 .di-meta{display:flex;gap:6px;flex-wrap:wrap}
-
+ 
 /* ACTORS */
 .actor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
 .actor-card{background:white;border:1px solid var(--g200);border-radius:10px;padding:16px;transition:all .15s}
@@ -183,7 +183,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .actor-links{display:flex;gap:6px;flex-wrap:wrap}
 .actor-link{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--bbg);color:#1d4ed8;border:1px solid var(--bborder);text-decoration:none;font-family:var(--mono);transition:background .1s}
 .actor-link:hover{background:var(--bborder)}
-
+ 
 /* CONFIG */
 .cfg-card{background:white;border:1px solid var(--g200);border-radius:10px;padding:20px;margin-bottom:14px}
 .cfg-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
@@ -198,14 +198,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 .qbtn{padding:8px 16px;border-radius:7px;background:var(--blue);color:white;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
 .qbtn:hover{background:#1d4ed8}
 .qresult{margin-top:10px}
-
+ 
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--g300);border-radius:3px}
 </style>
 </head>
 <body>
-
+ 
 <!-- SIDEBAR -->
 <nav class="sb">
   <div class="sb-top">
@@ -215,7 +215,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
     </div>
     <div class="sb-alive"><div class="alive-dot"></div><span class="sb-alive-txt">SISTEMA ATIVO</span></div>
   </div>
-
+ 
   <div class="sb-sec">Monitoramento</div>
   <div class="nav-item active" onclick="goPage('dashboard',this)"><div class="nav-left"><span class="nav-icon">◈</span>Dashboard</div></div>
   <div class="nav-item" onclick="goPage('risk',this)"><div class="nav-left"><span class="nav-icon">⚡</span>Análise de Risco</div></div>
@@ -224,7 +224,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   <div class="nav-item" onclick="goPage('actors',this)"><div class="nav-left"><span class="nav-icon">👥</span>Atores</div></div>
   <div class="nav-item" onclick="goPage('dates',this)"><div class="nav-left"><span class="nav-icon">📅</span>Datas Críticas</div></div>
   <div class="nav-item" onclick="goPage('countries',this)"><div class="nav-left"><span class="nav-icon">🌎</span>Por País</div></div>
-
+ 
   <div class="sb-sec">Países</div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Guatemala')"><div class="nav-left">🇬🇹 Guatemala</div><span class="nb alto">Alto</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('El-Salvador')"><div class="nav-left">🇸🇻 El Salvador</div><span class="nb crit">Crítico</span></div>
@@ -232,16 +232,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Nicaragua')"><div class="nav-left">🇳🇮 Nicaragua</div><span class="nb crit">Crítico</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Costa-Rica')"><div class="nav-left">🇨🇷 Costa Rica</div><span class="nb low">Bajo</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Panama')"><div class="nav-left">🇵🇦 Panamá</div><span class="nb med">Medio</span></div>
-
+ 
   <div class="sb-sec">Sistema</div>
   <div class="nav-item" onclick="goPage('config',this)"><div class="nav-left"><span class="nav-icon">⚙</span>Configuração</div></div>
-
+ 
   <div class="sb-footer">
     <p>Motor: <b>Gemini AI</b><br>Intervalo: <b>2x/día (auto)</b><br>Países: <b>6</b><br>Fuente: <b>Google Search</b></p>
-    <div class="sb-ts">Actualizado: 29/03/2026 07:51 (CR)</div>
+    <div class="sb-ts">Actualizado: 29/03/2026 07:59 (CR)</div>
   </div>
 </nav>
-
+ 
 <!-- MAIN -->
 <div class="main">
 <div class="topbar">
@@ -250,11 +250,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
     <p id="page-sub">Monitor de seguridad e inteligencia operacional · Centroamérica</p>
   </div>
   <div class="tb-right">
-    <span class="date-chip" id="datelbl">29/03/2026 07:51 (CR)</span>
+    <span class="date-chip" id="datelbl">29/03/2026 07:59 (CR)</span>
     <div class="timer-chip"><div class="alive-dot"></div>Próx. actualización <b id="cd">15:00</b><div class="tbar"><div class="tfill" id="tf" style="width:100%"></div></div></div>
   </div>
 </div>
-
+ 
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard"><div class="pi">
   <div class="kpi-row">
@@ -264,7 +264,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
     <div class="kpi"><div class="kpi-v blue">6</div><div class="kpi-l">Países cubiertos</div><div class="kpi-s">Cobertura total</div></div>
     <div class="kpi"><div class="kpi-v green">✓</div><div class="kpi-l">Gemini AI</div><div class="kpi-s">Activo · gratis</div></div>
   </div>
-
+ 
   <div class="rc-row">
     <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
       <div class="rc-level alto">ALTO · Operacional</div><h3>Infraestructura y operaciones</h3><p>Sin datos</p>
@@ -282,12 +282,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
       <div class="rc-level alto">ALTO · Seguridad</div><h3>Seguridad y crimen</h3><p>Sin datos</p>
     </div>
   </div>
-
+ 
   <div class="two-col">
     <div>
       <div class="ai-box">
-        <div class="ai-top"><div style="display:flex;align-items:center;gap:8px"><span class="ai-chip">GEMINI AI</span><span style="font-size:13px;font-weight:600;color:var(--g700)">Briefing ejecutivo del día</span></div><span class="ai-ts">29/03/2026 07:51 (CR)</span></div>
-        <div class="ai-body">Error al consultar Gemini: 429 Client Error: Too Many Requests for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=AIzaSyDklINudTDt-xdOeZ6dl-c6lj2D5CePfCg</div>
+        <div class="ai-top"><div style="display:flex;align-items:center;gap:8px"><span class="ai-chip">GEMINI AI</span><span style="font-size:13px;font-weight:600;color:var(--g700)">Briefing ejecutivo del día</span></div><span class="ai-ts">29/03/2026 07:59 (CR)</span></div>
+        <div class="ai-body">Error al consultar Gemini: 429 Client Error: Too Many Requests for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDklINudTDt-xdOeZ6dl-c6lj2D5CePfCg</div>
       </div>
       <div class="ph"><div><div style="font-size:16px;font-weight:700;color:var(--g900)">Alertas recientes</div><div style="font-size:11px;color:var(--g400);font-family:var(--mono)">Últimas 48h · clic para abrir fuente</div></div><a onclick="goPage('alerts',document.querySelectorAll('.nav-item')[2])">Ver todas →</a></div>
       
@@ -302,14 +302,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
     </div>
   </div>
 </div></div>
-
+ 
 <!-- RISK -->
 <div class="page" id="page-risk"><div class="pi">
   <div class="ph"><div><h2>Análisis de riesgo</h2><p>Matriz consolidada por categoría · Últimos 7 días</p></div></div>
   
   
 </div></div>
-
+ 
 <!-- ALERTS -->
 <div class="page" id="page-alerts"><div class="pi">
   <div class="ph"><div><h2>Alertas activas</h2><p>0 alertas · Últimos 7 días · clic en cada alerta para ir a la fuente</p></div></div>
@@ -324,7 +324,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   <div id="alerts-list"><p style='padding:16px;color:#9ca3af'>Sin alertas recientes</p></div>
   
 </div></div>
-
+ 
 <!-- NEWS -->
 <div class="page" id="page-news"><div class="pi">
   <div class="ph"><div><h2>Noticias</h2><p>Monitoreo de noticias relevantes · clic en cada noticia para leer la fuente completa</p></div></div>
@@ -339,7 +339,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   <div id="news-list"><p style='padding:16px;color:#9ca3af'>Sin noticias recientes</p></div>
   
 </div></div>
-
+ 
 <!-- ACTORS -->
 <div class="page" id="page-actors"><div class="pi">
   <div class="ph"><div><h2>Actores clave</h2><p>Quiénes son, por qué importan para el BM y cómo seguirlos · links directos</p></div></div>
@@ -469,14 +469,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   <div class="actor-links"><a href="https://www.first-quantum.com" target="_blank" rel="noopener" class="actor-link">↗ firstquantum.com</a></div>
 </div></div>
 </div></div>
-
+ 
 <!-- DATES -->
 <div class="page" id="page-dates"><div class="pi">
   <div class="ph"><div><h2>Fechas críticas 2026</h2><p>Calendario de eventos, movilizaciones y riesgos operacionales</p></div></div>
   
   
 </div></div>
-
+ 
 <!-- COUNTRIES -->
 <div class="page" id="page-countries"><div class="pi">
   <div class="ph"><div><h2>Monitor por país</h2><p>Contexto político, seguridad y geografía operacional</p></div></div>
@@ -560,7 +560,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
 </div>
 </div>
 </div></div>
-
+ 
 <!-- CONFIG -->
 <div class="page" id="page-config"><div class="pi">
   <div class="ph"><div><h2>Configuração</h2><p>Cómo funciona el sistema de actualización automática</p></div></div>
@@ -574,13 +574,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14
   </div>
   <div class="cfg-card">
     <h3>📊 Última actualización</h3>
-    <p>Fecha: <b>29/03/2026 07:51 (CR)</b><br>Modelo: <b>gemini-2.5-flash-lite</b><br>Alertas generadas: <b>0</b><br>Noticias generadas: <b>0</b></p>
+    <p>Fecha: <b>29/03/2026 07:59 (CR)</b><br>Modelo: <b>gemini-2.0-flash</b><br>Alertas generadas: <b>0</b><br>Noticias generadas: <b>0</b></p>
   </div>
 </div></div>
-
+ 
 </div><!-- main -->
 </div><!-- body -->
-
+ 
 <script>
 const TOTAL=900;let rem=TOTAL;
 const PAGE_META={
@@ -593,7 +593,7 @@ const PAGE_META={
   countries:{title:'Por País',sub:'Contexto político, seguridad y geografía operacional'},
   config:{title:'Configuração',sub:'Cómo funciona el sistema de actualización automática'},
 };
-
+ 
 function goPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
@@ -603,14 +603,14 @@ function goPage(id,el){
   document.getElementById('page-title').textContent=m.title||id;
   document.getElementById('page-sub').textContent=m.sub||'';
 }
-
+ 
 function scrollCountry(id){
   setTimeout(()=>{
     const el=document.getElementById('country-'+id);
     if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
   },100);
 }
-
+ 
 function filterCards(listId,cat,btn){
   const container=document.getElementById(listId+'-list');
   if(!container)return;
@@ -623,7 +623,7 @@ function filterCards(listId,cat,btn){
     card.style.display=match?'block':'none';
   });
 }
-
+ 
 function filterActors(cat,btn){
   document.querySelectorAll('#actor-filter .fb,.fbar .fb').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
@@ -631,7 +631,7 @@ function filterActors(cat,btn){
     card.style.display=(cat==='all'||card.dataset.cat===cat)?'block':'none';
   });
 }
-
+ 
 function pad(n){return String(n).padStart(2,'0')}
 function tick(){
   rem--;
