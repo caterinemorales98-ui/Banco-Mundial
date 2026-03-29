@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Monitor Centroamérica — Banco Mundial</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sb:#111827;--sb2:#1f2937;
+  --bg:#f3f4f6;--white:#fff;
+  --g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g700:#374151;--g800:#1f2937;--g900:#111827;
+  --red:#dc2626;--rbg:#fef2f2;--rborder:#fecaca;
+  --amber:#d97706;--abg:#fffbeb;--aborder:#fde68a;
+  --blue:#2563eb;--bbg:#eff6ff;--bborder:#bfdbfe;
+  --green:#16a34a;--gbg:#f0fdf4;--gborder:#bbf7d0;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Courier New',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14px;display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:210px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb::-webkit-scrollbar{width:3px}.sb::-webkit-scrollbar-thumb{background:#374151}
+.sb-top{padding:18px 16px 14px;border-bottom:1px solid #1f2937}
+.sb-brand{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.sb-logo{width:30px;height:30px;background:#1d4ed8;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo svg{width:14px;height:14px;fill:white}
+.sb-title{font-size:13px;font-weight:700;color:white}
+.sb-sub{font-size:10px;color:#6b7280;margin-top:1px}
+.sb-alive{display:flex;align-items:center;gap:7px;background:#064e3b;border:1px solid #065f46;border-radius:6px;padding:5px 9px}
+.alive-dot{width:6px;height:6px;border-radius:50%;background:#34d399;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sb-alive-txt{font-size:10px;color:#34d399;font-family:var(--mono)}
+.sb-sec{font-size:9px;font-weight:700;color:#4b5563;padding:12px 16px 4px;letter-spacing:.1em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;font-size:12px;color:#9ca3af;cursor:pointer;border-left:2px solid transparent;transition:all .1s;user-select:none}
+.nav-item:hover{background:#1f2937;color:#e5e7eb}
+.nav-item.active{color:white;border-left-color:#3b82f6;background:#1e3a5f;font-weight:600}
+.nav-left{display:flex;align-items:center;gap:8px}
+.nav-icon{font-size:14px}
+.nb{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;font-family:var(--mono);white-space:nowrap}
+.sb .nb{font-size:9px}
+.sb .nb.crit{background:#7f1d1d;color:#fca5a5}
+.sb .nb.alto{background:#78350f;color:#fcd34d}
+.sb .nb.low{background:#064e3b;color:#6ee7b7}
+.sb .nb.med{background:#1e3a5f;color:#93c5fd}
+.sb-footer{margin-top:auto;padding:12px 16px;border-top:1px solid #1f2937}
+.sb-footer p{font-size:10px;color:#4b5563;line-height:1.7;font-family:var(--mono)}
+.sb-footer b{color:#6b7280}
+.sb-ts{font-size:10px;color:#34d399;font-family:var(--mono);margin-top:6px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:white;border-bottom:1px solid var(--g200);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.tb-left h2{font-size:17px;font-weight:700;color:var(--g900)}
+.tb-left p{font-size:11px;color:var(--g400);margin-top:1px;font-family:var(--mono)}
+.tb-right{display:flex;align-items:center;gap:8px}
+.date-chip{font-size:11px;color:var(--g400);font-family:var(--mono)}
+.timer-chip{display:flex;align-items:center;gap:6px;background:var(--g100);border:1px solid var(--g200);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--g500);font-family:var(--mono)}
+.tbar{width:60px;height:3px;background:var(--g200);border-radius:2px;overflow:hidden}
+.tfill{height:100%;background:#3b82f6;border-radius:2px;transition:width 1s linear}
+
+/* PAGES */
+.page{display:none;flex:1;overflow-y:auto}
+.page.active{display:block}
+.pi{padding:20px 22px;max-width:1380px;margin:0 auto}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.ph h2{font-size:20px;font-weight:700;color:var(--g900)}
+.ph p{font-size:11px;color:var(--g400);margin-top:2px;font-family:var(--mono)}
+.ph a{font-size:12px;color:var(--blue);cursor:pointer;text-decoration:none}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px}
+.kpi-v{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-v.red{color:var(--red)} .kpi-v.amber{color:var(--amber)} .kpi-v.green{color:var(--green)} .kpi-v.blue{color:var(--blue)}
+.kpi-l{font-size:11px;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kpi-s{font-size:11px;color:var(--g500);margin-top:4px}
+
+/* RISK CARDS */
+.rc-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.rc{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;text-decoration:none;display:block}
+.rc:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px)}
+.rc-level{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;font-family:var(--mono)}
+.rc-level.crit{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}
+.rc-level.alto{background:var(--abg);color:var(--amber);border:1px solid var(--aborder)}
+.rc-level.med{background:var(--bbg);color:var(--blue);border:1px solid var(--bborder)}
+.rc h3{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:6px}
+.rc p{font-size:12px;color:var(--g500);line-height:1.5}
+
+/* NEWS CARDS */
+.nb.crit{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}
+.nb.alto{background:var(--abg);color:var(--amber);border:1px solid var(--aborder)}
+.nb.med{background:var(--bbg);color:var(--blue);border:1px solid var(--bborder)}
+.nb.low{background:var(--gbg);color:var(--green);border:1px solid var(--gborder)}
+.nb.cat{background:var(--g100);color:var(--g500);border:1px solid var(--g200)}
+.nb.new{background:#fef08a;color:#713f12;border:1px solid #fde047}
+.nc{background:white;border:1px solid var(--g200);border-left:4px solid transparent;border-radius:10px;padding:16px 18px;margin-bottom:10px;display:block;text-decoration:none;color:inherit;transition:all .15s;position:relative}
+.nc:hover{box-shadow:0 4px 16px rgba(0,0,0,.09)}
+.nc:hover h3{color:var(--blue)}
+.nc.crit{border-left-color:var(--red)}
+.nc.alto{border-left-color:var(--amber)}
+.nc.med{border-left-color:var(--blue)}
+.nc.low{border-left-color:var(--green)}
+.card-new{position:absolute;top:12px;right:12px}
+.nc-top{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.nc h3{font-size:14px;font-weight:600;color:var(--g900);line-height:1.4;margin-bottom:8px;transition:color .15s}
+.nc p{font-size:13px;color:var(--g500);line-height:1.6;margin-bottom:10px}
+.nc-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nc-loc{font-size:11px;color:var(--g400)}
+.nc-date{font-size:11px;color:var(--g400);font-family:var(--mono)}
+.nc-src{font-size:11px;font-weight:600;color:var(--blue)}
+
+/* SOURCES */
+.sources{margin-top:14px;padding-top:12px;border-top:1px solid var(--g100)}
+.src-label{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;font-family:var(--mono)}
+.src-link{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--g100);border:1px solid var(--g200);border-radius:6px;margin-bottom:5px;text-decoration:none;color:var(--blue);font-size:12px;transition:all .12s}
+.src-link:hover{background:var(--bbg);border-color:var(--bborder)}
+
+/* FILTER BAR */
+.fbar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.fb{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--g300);background:white;color:var(--g600);transition:all .12s}
+.fb:hover{border-color:#93c5fd;color:var(--blue)}
+.fb.on{background:var(--blue);color:white;border-color:var(--blue)}
+
+/* AI BOX */
+.ai-box{background:white;border:1px solid var(--g200);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.ai-top{padding:11px 18px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
+.ai-chip{font-size:10px;background:var(--blue);color:white;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-weight:700;letter-spacing:.04em}
+.ai-ts{font-size:10px;color:var(--g300);font-family:var(--mono)}
+.ai-body{padding:18px 20px;font-size:13px;color:var(--g700);line-height:1.8}
+
+/* LAYOUT */
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:1000px){.two-col,.three-col,.kpi-row,.rc-row{grid-template-columns:1fr 1fr}}
+
+/* RISK MATRIX */
+.rmc{background:white;border:1px solid var(--g200);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.rmc-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g100)}
+.rmc-title{font-size:13px;font-weight:700;color:var(--g800);display:flex;align-items:center;gap:6px}
+.rmc-body{padding:12px 16px}
+.rmc-body p{font-size:13px;color:var(--g600);line-height:1.7;margin-bottom:6px}
+.rmc-country{font-size:11px;color:var(--g400);font-family:var(--mono)}
+
+/* COUNTRIES */
+.country-section{margin-bottom:28px}
+.country-hero{display:flex;align-items:center;gap:16px;background:white;border:1px solid var(--g200);border-radius:10px;padding:18px 20px;margin-bottom:14px}
+.ch-flag{font-size:48px;line-height:1}
+.ch-name{font-size:22px;font-weight:700;color:var(--g900);margin-bottom:4px}
+.ch-risk{font-size:13px;color:var(--g500)}
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ctx-box{background:white;border:1px solid var(--g200);border-radius:10px;padding:16px 18px}
+.ctx-full{grid-column:1/-1}
+.ctx-box h4{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ctx-box p{font-size:13px;color:var(--g600);line-height:1.8}
+
+/* DATES */
+.di{background:white;border:1px solid var(--g200);border-left:4px solid transparent;border-radius:10px;padding:14px 16px;display:flex;gap:14px;margin-bottom:8px}
+.di.crit{border-left-color:var(--red)}
+.di.alto{border-left-color:var(--amber)}
+.di.med{border-left-color:var(--blue)}
+.di-date{text-align:center;width:44px;flex-shrink:0}
+.di-day{font-size:22px;font-weight:700;color:var(--g900);line-height:1}
+.di-mon{font-size:10px;color:var(--g400);text-transform:uppercase;font-family:var(--mono)}
+.di-body{flex:1}
+.di-title{font-size:13px;font-weight:600;color:var(--g900);margin-bottom:3px}
+.di-desc{font-size:12px;color:var(--g500);line-height:1.5;margin-bottom:5px}
+.di-meta{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ACTORS */
+.actor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.actor-card{background:white;border:1px solid var(--g200);border-radius:10px;padding:16px;transition:all .15s}
+.actor-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.actor-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.actor-name{font-size:14px;font-weight:700;color:var(--g900);margin-bottom:2px}
+.actor-type{font-size:11px;color:var(--g400);font-family:var(--mono)}
+.actor-why-label{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.actor-why{font-size:12px;color:var(--g600);line-height:1.6;margin-bottom:8px}
+.actor-ctx{font-size:12px;color:var(--g600);line-height:1.5;padding:8px 10px;border-radius:6px;border-left:3px solid var(--g300);background:var(--g100);margin-bottom:8px}
+.actor-ctx.red{border-left-color:var(--red);background:var(--rbg)}
+.actor-ctx.amber{border-left-color:var(--amber);background:var(--abg)}
+.actor-links{display:flex;gap:6px;flex-wrap:wrap}
+.actor-link{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--bbg);color:#1d4ed8;border:1px solid var(--bborder);text-decoration:none;font-family:var(--mono);transition:background .1s}
+.actor-link:hover{background:var(--bborder)}
+
+/* CONFIG */
+.cfg-card{background:white;border:1px solid var(--g200);border-radius:10px;padding:20px;margin-bottom:14px}
+.cfg-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.cfg-card p,.cfg-card li{font-size:13px;color:var(--g500);line-height:1.7}
+.cfg-card ul{padding-left:20px;margin-top:8px}
+.query-box{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 18px;margin-bottom:14px}
+.ql{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-family:var(--mono)}
+.qrow{display:flex;gap:8px}
+.qi{flex:1;background:var(--g100);border:1px solid var(--g200);border-radius:7px;padding:8px 14px;color:var(--g900);font-size:13px;font-family:var(--font);outline:none}
+.qi:focus{border-color:#93c5fd;background:white}
+.qi::placeholder{color:var(--g400)}
+.qbtn{padding:8px 16px;border-radius:7px;background:var(--blue);color:white;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.qbtn:hover{background:#1d4ed8}
+.qresult{margin-top:10px}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--g300);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-top">
+    <div class="sb-brand">
+      <div class="sb-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" stroke="white" stroke-width="1.8" fill="none"/><circle cx="10" cy="10" r="3" fill="white"/></svg></div>
+      <div><div class="sb-title">MONITOR CA</div><div class="sb-sub">Banco Mundial</div></div>
+    </div>
+    <div class="sb-alive"><div class="alive-dot"></div><span class="sb-alive-txt">SISTEMA ATIVO</span></div>
+  </div>
+
+  <div class="sb-sec">Monitoramento</div>
+  <div class="nav-item active" onclick="goPage('dashboard',this)"><div class="nav-left"><span class="nav-icon">◈</span>Dashboard</div></div>
+  <div class="nav-item" onclick="goPage('risk',this)"><div class="nav-left"><span class="nav-icon">⚡</span>Análise de Risco</div></div>
+  <div class="nav-item" onclick="goPage('alerts',this)"><div class="nav-left"><span class="nav-icon">🔔</span>Alertas</div><span class="nb crit">0</span></div>
+  <div class="nav-item" onclick="goPage('news',this)"><div class="nav-left"><span class="nav-icon">📰</span>Notícias</div></div>
+  <div class="nav-item" onclick="goPage('actors',this)"><div class="nav-left"><span class="nav-icon">👥</span>Atores</div></div>
+  <div class="nav-item" onclick="goPage('dates',this)"><div class="nav-left"><span class="nav-icon">📅</span>Datas Críticas</div></div>
+  <div class="nav-item" onclick="goPage('countries',this)"><div class="nav-left"><span class="nav-icon">🌎</span>Por País</div></div>
+
+  <div class="sb-sec">Países</div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Guatemala')"><div class="nav-left">🇬🇹 Guatemala</div><span class="nb alto">Alto</span></div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('El-Salvador')"><div class="nav-left">🇸🇻 El Salvador</div><span class="nb crit">Crítico</span></div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Honduras')"><div class="nav-left">🇭🇳 Honduras</div><span class="nb alto">Alto</span></div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Nicaragua')"><div class="nav-left">🇳🇮 Nicaragua</div><span class="nb crit">Crítico</span></div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Costa-Rica')"><div class="nav-left">🇨🇷 Costa Rica</div><span class="nb low">Bajo</span></div>
+  <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Panama')"><div class="nav-left">🇵🇦 Panamá</div><span class="nb med">Medio</span></div>
+
+  <div class="sb-sec">Sistema</div>
+  <div class="nav-item" onclick="goPage('config',this)"><div class="nav-left"><span class="nav-icon">⚙</span>Configuração</div></div>
+
+  <div class="sb-footer">
+    <p>Motor: <b>Gemini AI</b><br>Intervalo: <b>2x/día (auto)</b><br>Países: <b>6</b><br>Fuente: <b>Google Search</b></p>
+    <div class="sb-ts">Actualizado: 29/03/2026 07:41 (CR)</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+  <div class="tb-left">
+    <h2 id="page-title">Dashboard</h2>
+    <p id="page-sub">Monitor de seguridad e inteligencia operacional · Centroamérica</p>
+  </div>
+  <div class="tb-right">
+    <span class="date-chip" id="datelbl">29/03/2026 07:41 (CR)</span>
+    <div class="timer-chip"><div class="alive-dot"></div>Próx. actualización <b id="cd">15:00</b><div class="tbar"><div class="tfill" id="tf" style="width:100%"></div></div></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard"><div class="pi">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-v red">2</div><div class="kpi-l">Países críticos</div><div class="kpi-s">NI + SV</div></div>
+    <div class="kpi"><div class="kpi-v amber">2</div><div class="kpi-l">Vigilancia alta</div><div class="kpi-s">GT + HN</div></div>
+    <div class="kpi"><div class="kpi-v red">0</div><div class="kpi-l">Alertas activas</div><div class="kpi-s">Últimos 7 días</div></div>
+    <div class="kpi"><div class="kpi-v blue">6</div><div class="kpi-l">Países cubiertos</div><div class="kpi-s">Cobertura total</div></div>
+    <div class="kpi"><div class="kpi-v green">✓</div><div class="kpi-l">Gemini AI</div><div class="kpi-s">Activo · gratis</div></div>
+  </div>
+
+  <div class="rc-row">
+    <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
+      <div class="rc-level alto">ALTO · Operacional</div><h3>Infraestructura y operaciones</h3><p>Bloqueos viales en Guatemala por alza de combustibles persisten en al menos dos carreteras principales. (26 de Marzo de 2026)</p>
+    </div>
+    <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
+      <div class="rc-level alto">ALTO · Político</div><h3>Riesgo político regional</h3><p>Riesgo de volatilidad política y fragilidad institucional se mantiene en Centroamérica, con tensiones fiscales. (25 de Marzo de 2026)</p>
+    </div>
+    <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
+      <div class="rc-level alto">ALTO · Climático</div><h3>Alertas climáticas</h3><p>No se reportan alertas climáticas activas de forma generalizada para hoy.</p>
+    </div>
+    <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
+      <div class="rc-level crit">CRÍTICO · Social</div><h3>Movimientos sociales</h3><p>Manifestaciones de transportistas en Guatemala por alza de combustibles continúan afectando el tránsito. (24 de Marzo de 2026)</p>
+    </div>
+    <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
+      <div class="rc-level alto">ALTO · Seguridad</div><h3>Seguridad y crimen</h3><p>Reportes de capturas de extraditables y pandilleros en Guatemala y El Salvador, con incidentes de violencia relacionados. (28 de Marzo de 2026)</p>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="ai-box">
+        <div class="ai-top"><div style="display:flex;align-items:center;gap:8px"><span class="ai-chip">GEMINI AI</span><span style="font-size:13px;font-weight:600;color:var(--g700)">Briefing ejecutivo del día</span></div><span class="ai-ts">29/03/2026 07:41 (CR)</span></div>
+        <div class="ai-body">Error al consultar Gemini: 429 Client Error: Too Many Requests for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=AIzaSyBIXpsfYoHvODUjgy8X1696-Ljm1uTKbXY</div>
+      </div>
+      <div class="ph"><div><div style="font-size:16px;font-weight:700;color:var(--g900)">Alertas recientes</div><div style="font-size:11px;color:var(--g400);font-family:var(--mono)">Últimas 48h · clic para abrir fuente</div></div><a onclick="goPage('alerts',document.querySelectorAll('.nav-item')[2])">Ver todas →</a></div>
+      
+    </div>
+    <div>
+      <div class="ph"><div><div style="font-size:16px;font-weight:700;color:var(--g900)">Últimas noticias</div><div style="font-size:11px;color:var(--g400);font-family:var(--mono)">Fuentes verificadas · clic para leer</div></div><a onclick="goPage('news',document.querySelectorAll('.nav-item')[3])">Ver todas →</a></div>
+      
+      <div style="margin-top:16px">
+        <div class="ph"><div style="font-size:16px;font-weight:700;color:var(--g900)">Próximas fechas críticas</div><a onclick="goPage('dates',document.querySelectorAll('.nav-item')[5])">Ver todas →</a></div>
+        
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- RISK -->
+<div class="page" id="page-risk"><div class="pi">
+  <div class="ph"><div><h2>Análisis de riesgo</h2><p>Matriz consolidada por categoría · Últimos 7 días</p></div></div>
+  
+  
+</div></div>
+
+<!-- ALERTS -->
+<div class="page" id="page-alerts"><div class="pi">
+  <div class="ph"><div><h2>Alertas activas</h2><p>0 alertas · Últimos 7 días · clic en cada alerta para ir a la fuente</p></div></div>
+  <div class="fbar">
+    <button class="fb on" onclick="filterCards('alerts','all',this)">Todos (0)</button>
+    <button class="fb" onclick="filterCards('alerts','Operacional',this)">Operacional</button>
+    <button class="fb" onclick="filterCards('alerts','Seguridad',this)">Seguridad</button>
+    <button class="fb" onclick="filterCards('alerts','Climático',this)">Climático</button>
+    <button class="fb" onclick="filterCards('alerts','Social',this)">Social/Crisis</button>
+    <button class="fb" onclick="filterCards('alerts','Político',this)">Político</button>
+  </div>
+  <div id="alerts-list"><p style='padding:16px;color:#9ca3af'>Sin alertas recientes</p></div>
+  
+</div></div>
+
+<!-- NEWS -->
+<div class="page" id="page-news"><div class="pi">
+  <div class="ph"><div><h2>Noticias</h2><p>Monitoreo de noticias relevantes · clic en cada noticia para leer la fuente completa</p></div></div>
+  <div class="fbar">
+    <button class="fb on" onclick="filterCards('news','all',this)">Todos</button>
+    <button class="fb" onclick="filterCards('news','Operacional',this)">Operacional</button>
+    <button class="fb" onclick="filterCards('news','Seguridad',this)">Seguridad</button>
+    <button class="fb" onclick="filterCards('news','Climático',this)">Climático</button>
+    <button class="fb" onclick="filterCards('news','Social',this)">Social</button>
+    <button class="fb" onclick="filterCards('news','Político',this)">Político</button>
+  </div>
+  <div id="news-list"><p style='padding:16px;color:#9ca3af'>Sin noticias recientes</p></div>
+  
+</div></div>
+
+<!-- ACTORS -->
+<div class="page" id="page-actors"><div class="pi">
+  <div class="ph"><div><h2>Actores clave</h2><p>Quiénes son, por qué importan para el BM y cómo seguirlos · links directos</p></div></div>
+  <div class="fbar">
+    <button class="fb on" onclick="filterActors('all',this)">Todos</button>
+    <button class="fb" onclick="filterActors('mov',this)">Movimientos sociales</button>
+    <button class="fb" onclick="filterActors('med',this)">Medios independientes</button>
+    <button class="fb" onclick="filterActors('pol',this)">Actores políticos</button>
+    <button class="fb" onclick="filterActors('seg',this)">Seguridad / crimen</button>
+  </div>
+  <div class="actor-grid" id="actors-grid"><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="mov">
+  <div class="actor-head">
+    <div><div class="actor-name">🇬🇹 CODECA</div><div class="actor-type">Movimiento social campesino — Guatemala</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Responsable de los principales bloqueos carreteros. Sus movilizaciones cortan la CA-2 y vías al occidente, afectando misiones del Banco Mundial.</div>
+  <div class="actor-ctx red">Más de 40 bloqueos en 3 años. Demanda nacionalización eléctrica y distribución de tierras.</div>
+  <div class="actor-links"><a href="https://twitter.com/codeca_gt" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://instagram.com/codeca_gt" target="_blank" rel="noopener" class="actor-link">↗ Instagram</a></div>
+</div><div class="actor-card" style="border-top:3px solid #d97706" data-cat="mov">
+  <div class="actor-head">
+    <div><div class="actor-name">🇭🇳 COPINH</div><div class="actor-type">Organización indígena Lenca — Honduras</div></div>
+    <span class="nb alto">ALTO</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Sus conflictos en torno a proyectos hidroeléctricos pueden afectar proyectos de infraestructura con financiamiento internacional.</div>
+  <div class="actor-ctx amber">Herederos de Berta Cáceres. Líderes bajo amenaza. Conflicto activo en Río Blanco.</div>
+  <div class="actor-links"><a href="https://twitter.com/COPINH_Honduras" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a></div>
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="mov">
+  <div class="actor-head">
+    <div><div class="actor-name">🇸🇻 Cristosal</div><div class="actor-type">Organización DDHH — El Salvador</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Principal fuente de documentación bajo el régimen de excepción. Sus reportes son la base de informes del BM sobre El Salvador.</div>
+  <div class="actor-ctx red">Documenta +70.000 detenidos sin proceso. Muertes en custodia en el CECOT confirmadas.</div>
+  <div class="actor-links"><a href="https://twitter.com/Cristosal" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://cristosal.org" target="_blank" rel="noopener" class="actor-link">↗ cristosal.org</a></div>
+</div><div class="actor-card" style="border-top:3px solid #d97706" data-cat="mov">
+  <div class="actor-head">
+    <div><div class="actor-name">🌎 CIDH</div><div class="actor-type">Organismo multilateral — Regional</div></div>
+    <span class="nb alto">ALTO</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Sus medidas cautelares condicionan directamente la relación de los gobiernos con el BM. Una MC puede bloquear un desembolso.</div>
+  <div class="actor-ctx amber">Medidas cautelares activas en NI, SV y HN. Resoluciones jurídicamente vinculantes.</div>
+  <div class="actor-links"><a href="https://twitter.com/CIDH" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://oas.org/es/cidh" target="_blank" rel="noopener" class="actor-link">↗ oas.org/cidh</a></div>
+</div><div class="actor-card" style="border-top:3px solid #d97706" data-cat="mov">
+  <div class="actor-head">
+    <div><div class="actor-name">🇵🇦 Frente Anti-Minero</div><div class="actor-type">Movimiento ciudadano — Panamá</div></div>
+    <span class="nb alto">ALTO</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Forzó la cancelación del contrato de Cobre Panamá en 2023. Puede reactivarse ante cualquier renegociación.</div>
+  <div class="actor-ctx amber">Movimiento multiclasista. Arbitraje CIADI USD 20 mil millones activo.</div>
+  
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="med">
+  <div class="actor-head">
+    <div><div class="actor-name">🇸🇻 El Faro</div><div class="actor-type">Periodismo investigativo — El Salvador (exilio)</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Principal fuente de información sobre el régimen Bukele. Referencia obligatoria para evaluaciones de riesgo político en SV.</div>
+  <div class="actor-ctx red">Opera desde Costa Rica. Espionaje Pegasus confirmado. Periodistas con órdenes de captura.</div>
+  <div class="actor-links"><a href="https://twitter.com/elfaro_net" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://elfaro.net" target="_blank" rel="noopener" class="actor-link">↗ elfaro.net</a></div>
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="med">
+  <div class="actor-head">
+    <div><div class="actor-name">🇳🇮 Confidencial Nicaragua</div><div class="actor-type">Medio — Nicaragua (exilio en CR)</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Única fuente confiable de información sobre Nicaragua. Toda la prensa independiente fue clausurada.</div>
+  <div class="actor-ctx red">Directora condenada en ausencia. Opera desde Costa Rica desde 2021.</div>
+  <div class="actor-links"><a href="https://twitter.com/confidencial_ni" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://confidencial.digital" target="_blank" rel="noopener" class="actor-link">↗ confidencial.digital</a></div>
+</div><div class="actor-card" style="border-top:3px solid #2563eb" data-cat="med">
+  <div class="actor-head">
+    <div><div class="actor-name">🇬🇹 Plaza Pública</div><div class="actor-type">Periodismo investigativo — Guatemala</div></div>
+    <span class="nb med">MED</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Referente del periodismo de datos en Guatemala. Insumo para evaluaciones de riesgo.</div>
+  <div class="actor-ctx ">Financiado por la Universidad Rafael Landívar. Cobertura de conflictos sociales y corrupción.</div>
+  <div class="actor-links"><a href="https://twitter.com/PlazaPublicaGT" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a><a href="https://plazapublica.com.gt" target="_blank" rel="noopener" class="actor-link">↗ plazapublica.com.gt</a></div>
+</div><div class="actor-card" style="border-top:3px solid #d97706" data-cat="pol">
+  <div class="actor-head">
+    <div><div class="actor-name">🇬🇹 Gobierno Arévalo</div><div class="actor-type">Gobierno — Guatemala</div></div>
+    <span class="nb alto">ALTO</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Interlocutor principal del BM en Guatemala. Su estabilidad determina el ambiente para proyectos de desarrollo.</div>
+  <div class="actor-ctx amber">Bajo asedio del MP. El intento de golpe blando de 2023 fue frenado por presión del BM, BID y UE.</div>
+  <div class="actor-links"><a href="https://twitter.com/BArevalodeLeon" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a></div>
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="pol">
+  <div class="actor-head">
+    <div><div class="actor-name">🇸🇻 Gobierno Bukele</div><div class="actor-type">Gobierno — El Salvador</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">El gobierno más impredecible en DDHH. La condicionalidad del BM está en tensión permanente con sus políticas.</div>
+  <div class="actor-ctx red">Reelecto con 85%. Régimen de excepción indefinido. Control total del Estado.</div>
+  <div class="actor-links"><a href="https://twitter.com/nayibbukele" target="_blank" rel="noopener" class="actor-link">↗ Twitter/X</a></div>
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="pol">
+  <div class="actor-head">
+    <div><div class="actor-name">🇳🇮 Gobierno Ortega-Murillo</div><div class="actor-type">Gobierno — Nicaragua</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Régimen más cerrado de CA. BM tiene actividad mínima. Monitorear para detectar cambios.</div>
+  <div class="actor-ctx red">En el poder desde 2007. 300+ ONGs clausuradas. Exilio de 700.000+ personas.</div>
+  
+</div><div class="actor-card" style="border-top:3px solid #dc2626" data-cat="seg">
+  <div class="actor-head">
+    <div><div class="actor-name">🌎 MS-13 / Pandillas</div><div class="actor-type">Crimen organizado — Regional</div></div>
+    <span class="nb crit">CRIT</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Reconfigurada en HN y GT. Riesgo de extorsión a contratistas en zonas de proyectos de infraestructura.</div>
+  <div class="actor-ctx red">Huyeron de SV tras el régimen de excepción. Nuevas alianzas en HN y GT.</div>
+  
+</div><div class="actor-card" style="border-top:3px solid #d97706" data-cat="seg">
+  <div class="actor-head">
+    <div><div class="actor-name">🇵🇦 First Quantum / Cobre Panamá</div><div class="actor-type">Empresa minera — Panamá</div></div>
+    <span class="nb alto">ALTO</span>
+  </div>
+  <div class="actor-why-label">Por qué importa para el BM</div>
+  <div class="actor-why">Arbitraje USD 20 mil millones puede desestabilizar finanzas públicas de Panamá y afectar programas del BM.</div>
+  <div class="actor-ctx amber">Demanda ante CIADI activa. Frente Anti-Minero en alerta. Gobierno bajo presión.</div>
+  <div class="actor-links"><a href="https://www.first-quantum.com" target="_blank" rel="noopener" class="actor-link">↗ firstquantum.com</a></div>
+</div></div>
+</div></div>
+
+<!-- DATES -->
+<div class="page" id="page-dates"><div class="pi">
+  <div class="ph"><div><h2>Fechas críticas 2026</h2><p>Calendario de eventos, movilizaciones y riesgos operacionales</p></div></div>
+  
+  
+</div></div>
+
+<!-- COUNTRIES -->
+<div class="page" id="page-countries"><div class="pi">
+  <div class="ph"><div><h2>Monitor por país</h2><p>Contexto político, seguridad y geografía operacional</p></div></div>
+  <div class="country-section" id="country-Guatemala">
+<div class="country-hero">
+  <div class="ch-flag">🇬🇹</div>
+  <div class="ch-info">
+    <div class="ch-name">Guatemala</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#d97706">6.8/10 — Alto</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>El gobierno de Bernardo Arévalo (Movimiento Semilla) enfrenta una crisis institucional sin precedentes. La Fiscal General Consuelo Porras usa el Ministerio Público como instrumento político: ha intentado desaforar diputados oficialistas, perseguido funcionarios y bloqueado reformas anticorrupción. La inestabilidad política es el principal riesgo para proyectos del Banco Mundial en el país. Sin embargo, las instituciones democráticas aún funcionan, lo que diferencia a Guatemala de Nicaragua o El Salvador.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>CODECA protagoniza bloqueos recurrentes en la CA-2 (al Pacífico), CA-1 (interamericana) y vías al occidente. Sus demandas de nacionalización eléctrica no han sido atendidas. El crimen organizado opera en Petén y zonas fronterizas. Las vías al Quiché e Ixchiguán son especialmente sensibles durante movilizaciones.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>17 millones de habitantes. Carreteras estratégicas: CA-1 (interamericana norte-sur), CA-2 (Pacífico), Ruta al Atlántico RN-9 (hacia Puerto Barrios). Temporada de lluvias mayo-octubre. Ciudad de Guatemala es el hub de operaciones BM en la región.</p></div>
+</div>
+</div><div class="country-section" id="country-El-Salvador">
+<div class="country-hero">
+  <div class="ch-flag">🇸🇻</div>
+  <div class="ch-info">
+    <div class="ch-name">El Salvador</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#dc2626">8.8/10 — Crítico</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>El gobierno de Nayib Bukele, reelecto con 85% en 2024, controla todos los poderes del Estado. El régimen de excepción desde 2022 ha derivado en +70.000 detenidos sin proceso judicial en el CECOT. La prensa libre fue eliminada: El Faro opera desde exilio en Costa Rica. La condicionalidad del BM choca permanentemente con el marco de DDHH del régimen.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>Las pandillas MS-13 y Barrio 18 fueron desarticuladas dentro del país. Paradoja: el país más seguro de su historia reciente bajo un régimen que viola sistemáticamente los DDHH. Riesgo para misiones del BM: restricciones de acceso, imposibilidad de trabajar con sociedad civil, y riesgo reputacional.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>El país más pequeño de Centroamérica (21.000 km²). Carretera Panamericana CA-1 como eje principal. San Salvador como hub. Sin costa caribeña. Temporada lluviosa junio-octubre.</p></div>
+</div>
+</div><div class="country-section" id="country-Honduras">
+<div class="country-hero">
+  <div class="ch-flag">🇭🇳</div>
+  <div class="ch-info">
+    <div class="ch-name">Honduras</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#d97706">7.5/10 — Alto</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>La presidenta Xiomara Castro enfrenta fraccionamiento en su partido que bloquea el Congreso. Las extradiciones de narcotraficantes generan represalias del crimen organizado sobre funcionarios judiciales. La reforma judicial es urgente pero bloqueada políticamente.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>COPINH activo en Río Blanco e Intibucá. Conflictos agrarios en el Bajo Aguán (palma africana, DINANT). Barrio 18 y MS-13 reconfigurada en Tegucigalpa y SPS. La CA-5 es la carretera más crítica y monitoreada.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>Acceso al Caribe (Puerto Cortés) y Pacífico. CA-5 es el eje económico principal. Corredor Seco vulnerable a sequías. Tegucigalpa en cuenca del Choluteca con riesgo histórico de inundaciones.</p></div>
+</div>
+</div><div class="country-section" id="country-Nicaragua">
+<div class="country-hero">
+  <div class="ch-flag">🇳🇮</div>
+  <div class="ch-info">
+    <div class="ch-name">Nicaragua</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#dc2626">9.5/10 — Crítico</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>El régimen de Ortega-Murillo es el más cerrado de Centroamérica. Toda oposición fue eliminada. La Iglesia fue atacada: obispos detenidos y expulsados. 300+ ONGs clausuradas. La información confiable solo viene de medios en exilio.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>Sin sociedad civil activa. La Policía actúa como instrumento político-represivo. No hay protestas visibles. El principal indicador de crisis es el exilio masivo: 700.000+ personas emigraron desde 2018. Acceso muy limitado para organizaciones internacionales.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>Lago Nicaragua como recurso estratégico. Frontera sur con Costa Rica, norte con Honduras. Costa caribeña vulnerable a huracanes (junio-noviembre). Acceso físico difícil para misiones internacionales.</p></div>
+</div>
+</div><div class="country-section" id="country-Costa-Rica">
+<div class="country-hero">
+  <div class="ch-flag">🇨🇷</div>
+  <div class="ch-info">
+    <div class="ch-name">Costa Rica</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#16a34a">2.8/10 — Bajo</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>El gobierno de Rodrigo Chaves mantiene conflictos con la Asamblea Legislativa pero las instituciones democráticas operan con normalidad. Costa Rica es el hub regional del BM, sede de múltiples agencias ONU y punto de exilio para activistas y periodistas de la región.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>El crimen organizado usa Costa Rica como corredor de tránsito, aumentando la violencia en zonas costeras. La Fuerza Pública mantiene el orden. Las 18 instituciones monitoreadas (IMN, CNE, Bomberos, Tránsito) son fuentes de información confiables.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>Posición estratégica entre Nicaragua y Panamá. Ruta 27 (San José-Caldera) y Ruta 1 (norte) son críticas. San José concentra la mayoría de operaciones BM. Temporada lluviosa intensa en Caribe (todo el año) y Pacífico (mayo-noviembre).</p></div>
+</div>
+</div><div class="country-section" id="country-Panama">
+<div class="country-hero">
+  <div class="ch-flag">🇵🇦</div>
+  <div class="ch-info">
+    <div class="ch-name">Panamá</div>
+    <div class="ch-risk">Riesgo operacional: <b style="color:#2563eb">4.5/10 — Medio</b></div>
+  </div>
+</div>
+<div class="ctx-grid">
+  <div class="ctx-box"><h4>🏛 Contexto político</h4><p>El gobierno de Mulino enfrenta el arbitraje de First Quantum (USD 20 mil millones) por la cancelación del contrato de Cobre Panamá. El Frente Anti-Minero sigue activo. El Canal atraviesa su peor crisis hídrica en décadas.</p></div>
+  <div class="ctx-box"><h4>🛡 Seguridad operacional</h4><p>Panamá es relativamente estable pero el Darién es zona sin ley: 520.000+ migrantes cruzaron en 2023. Pandillas operan en la región del Darién. Ciudad de Panamá es segura para operaciones.</p></div>
+  <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>El Canal de Panamá es la infraestructura estratégica más importante del hemisferio. La Carretera Panamericana termina en el Darién. Darién: selva densa, sin carreteras, grupos armados irregulares.</p></div>
+</div>
+</div>
+</div></div>
+
+<!-- CONFIG -->
+<div class="page" id="page-config"><div class="pi">
+  <div class="ph"><div><h2>Configuração</h2><p>Cómo funciona el sistema de actualización automática</p></div></div>
+  <div class="cfg-card">
+    <h3>⚙️ Cómo funciona este panel</h3>
+    <p>Este dashboard es generado automáticamente por un script Python que corre en GitHub Actions dos veces al día (7am y 1pm hora de Costa Rica). El script llama a Gemini AI con Google Search para obtener noticias reales y genera este HTML completo con las noticias ya incluidas. Netlify detecta el cambio y publica automáticamente. Sin CORS, sin errores de API desde el navegador.</p>
+  </div>
+  <div class="cfg-card">
+    <h3>🔧 Para actualizar manualmente</h3>
+    <p>Ve a tu repositorio en GitHub → pestaña "Actions" → "Actualizar Monitor CA" → "Run workflow". El panel se actualiza en menos de 2 minutos.</p>
+  </div>
+  <div class="cfg-card">
+    <h3>📊 Última actualización</h3>
+    <p>Fecha: <b>29/03/2026 07:41 (CR)</b><br>Modelo: <b>gemini-2.5-flash-lite</b><br>Alertas generadas: <b>0</b><br>Noticias generadas: <b>0</b></p>
+  </div>
+</div></div>
+
+</div><!-- main -->
+</div><!-- body -->
+
+<script>
+const TOTAL=900;let rem=TOTAL;
+const PAGE_META={
+  dashboard:{title:'Dashboard',sub:'Monitor de seguridad e inteligencia operacional · Centroamérica'},
+  risk:{title:'Análise de Risco',sub:'Matriz consolidada de riesgo por categoría y país'},
+  alerts:{title:'Alertas activas',sub:'Clic en cada alerta para ir directamente a la fuente'},
+  news:{title:'Notícias',sub:'Monitoreo de noticias relevantes · clic para leer la fuente completa'},
+  actors:{title:'Atores clave',sub:'Quiénes son, por qué importan para el BM y cómo seguirlos'},
+  dates:{title:'Datas Críticas 2026',sub:'Calendario de eventos, movilizaciones y riesgos operacionales'},
+  countries:{title:'Por País',sub:'Contexto político, seguridad y geografía operacional'},
+  config:{title:'Configuração',sub:'Cómo funciona el sistema de actualización automática'},
+};
+
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const m=PAGE_META[id]||{};
+  document.getElementById('page-title').textContent=m.title||id;
+  document.getElementById('page-sub').textContent=m.sub||'';
+}
+
+function scrollCountry(id){
+  setTimeout(()=>{
+    const el=document.getElementById('country-'+id);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
+}
+
+function filterCards(listId,cat,btn){
+  const container=document.getElementById(listId+'-list');
+  if(!container)return;
+  document.querySelectorAll('#page-'+listId+' .fbar .fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  container.querySelectorAll('.nc').forEach(card=>{
+    if(cat==='all'){card.style.display='block';return;}
+    const badges=card.querySelectorAll('.nb.cat');
+    const match=[...badges].some(b=>b.textContent.toLowerCase().includes(cat.toLowerCase()));
+    card.style.display=match?'block':'none';
+  });
+}
+
+function filterActors(cat,btn){
+  document.querySelectorAll('#actor-filter .fb,.fbar .fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.actor-card').forEach(card=>{
+    card.style.display=(cat==='all'||card.dataset.cat===cat)?'block':'none';
+  });
+}
+
+function pad(n){return String(n).padStart(2,'0')}
+function tick(){
+  rem--;
+  if(rem<=0)rem=TOTAL;
+  document.getElementById('cd').textContent=pad(Math.floor(rem/60))+':'+pad(rem%60);
+  document.getElementById('tf').style.width=Math.round((rem/TOTAL)*100)+'%';
+}
+setInterval(tick,1000);
+</script>
+</body>
+</html>
