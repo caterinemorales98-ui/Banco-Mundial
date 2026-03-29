@@ -3,23 +3,23 @@ Monitor Centroamérica — Banco Mundial
 Robot de generación del dashboard
 Llama a Gemini, obtiene noticias reales y genera index.html completo
 """
-
+ 
 import os
 import requests
 import json
 from datetime import datetime, timezone, timedelta
-
+ 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 API_KEY = os.environ.get("GEMINI_API_KEY", "")
-MODEL   = "gemini-2.5-flash-lite"
+MODEL   = "gemini-2.0-flash"
 URL     = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
-
+ 
 CR_TZ   = timezone(timedelta(hours=-6))
 NOW     = datetime.now(CR_TZ)
 TODAY   = NOW.strftime("%A %d de %B de %Y")
 TIME    = NOW.strftime("%H:%M")
 DATE_LABEL = NOW.strftime("%d/%m/%Y %H:%M") + " (CR)"
-
+ 
 SYSTEM = f"""Eres un analista de inteligencia de seguridad especializado en Centroamérica para el Banco Mundial.
 FECHA HOY: {TODAY}, {TIME} hora de Costa Rica.
 REGLA CRÍTICA: Usa Google Search. Incluye noticias de hoy Y de los últimos 7 días cuando sean relevantes.
@@ -27,12 +27,14 @@ Siempre menciona la fecha de cada noticia. Texto limpio, sin asteriscos ni markd
 Cubre: Guatemala, El Salvador, Honduras, Nicaragua, Costa Rica, Panamá.
 Prioridades: bloqueos viales, manifestaciones, seguridad, alertas climáticas, riesgos políticos.
 Responde en español."""
-
+ 
 # ─── GEMINI CALL ──────────────────────────────────────────────────────────────
 def ask(prompt):
     if not API_KEY:
         print("⚠ Sin API key de Gemini")
         return {"text": "Sin API key configurada.", "sources": []}
+    import time
+    time.sleep(4)  # pause to avoid rate limiting
     try:
         body = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
@@ -60,7 +62,7 @@ def ask(prompt):
     except Exception as e:
         print(f"Error Gemini: {e}")
         return {"text": f"Error al consultar Gemini: {e}", "sources": []}
-
+ 
 # ─── PARSE STRUCTURED NEWS ────────────────────────────────────────────────────
 def parse_news(result):
     text = result.get("text", "")
@@ -84,20 +86,20 @@ def parse_news(result):
             "source_url":   src.get("url", "#"),
         })
     return items
-
+ 
 # ─── HTML HELPERS ─────────────────────────────────────────────────────────────
 def level_cls(level):
     if "CRÍTICO" in level: return "crit"
     if "ALTO" in level:    return "alto"
     if "MEDIO" in level:   return "med"
     return "low"
-
+ 
 def badge_html(level, category="", is_new=False):
     cls = level_cls(level)
     new_badge = '<span class="nb new">NOVO</span>' if is_new else ""
     cat_badge = f'<span class="nb cat">{category}</span>' if category else ""
     return f'<span class="nb {cls}">{level}</span>{cat_badge}{new_badge}'
-
+ 
 def news_card(item, is_new=False):
     cls = level_cls(item["level"])
     url = item["source_url"] or "#"
@@ -114,7 +116,7 @@ def news_card(item, is_new=False):
     <span class="nc-src">↗ {item["source_title"] or "Ver fuente"}</span>
   </div>
 </a>'''
-
+ 
 def sources_html(sources):
     if not sources:
         return ""
@@ -127,7 +129,7 @@ def sources_html(sources):
         for s in sources
     )
     return f'<div class="sources"><div class="src-label">Fuentes verificadas</div>{items}</div>'
-
+ 
 def date_item(parts):
     if len(parts) < 4:
         return ""
@@ -142,10 +144,10 @@ def date_item(parts):
     <div class="di-meta"><span class="{badge_cls}">{nivel}</span><span class="nb cat">{parts[2]}</span></div>
   </div>
 </div>'''
-
+ 
 # ─── FETCH ALL DATA ───────────────────────────────────────────────────────────
 print("🔍 Obteniendo datos de Gemini...")
-
+ 
 print("  → Risk cards...")
 r_risk = ask(f"""Para el dashboard del Banco Mundial, dame en 5 líneas el resumen de riesgo HOY en Centroamérica:
 OPERACIONAL: [resumen breve con país y fecha]
@@ -154,23 +156,23 @@ CLIMÁTICO: [alertas activas hoy con país]
 SOCIAL: [protestas o movimientos activos con país]
 SEGURIDAD: [incidentes de seguridad recientes con país]
 Máximo 30 palabras por línea.""")
-
+ 
 print("  → Alertas...")
 r_alerts = ask(f"""Busca en Google las 8 alertas más importantes de los ÚLTIMOS 7 DÍAS en Centroamérica para el Banco Mundial. Formato exacto, una línea por alerta:
 NIVEL|CATEGORÍA|TÍTULO COMPLETO|DESCRIPCIÓN DETALLADA (3-4 oraciones con contexto, fechas e impacto para operaciones BM)|LUGAR, PAÍS|FECHA|FUENTE
 Niveles: CRÍTICO, ALTO, MEDIO. Categorías: Operacional, Seguridad, Climático, Social/Crisis, Político
 Ordena de mayor a menor criticidad.""")
-
+ 
 print("  → Noticias...")
 r_news = ask(f"""Busca en Google las 12 noticias más relevantes de los ÚLTIMOS 7 DÍAS en Centroamérica sobre seguridad, protestas, bloqueos, política o clima. Formato exacto, una línea por noticia:
 NIVEL|CATEGORÍA|TÍTULO COMPLETO DE LA NOTICIA|DESCRIPCIÓN DETALLADA (3-4 oraciones con contexto completo e impacto para BM)|LUGAR, PAÍS|FECHA DD/MM/YYYY|FUENTE (nombre del medio)
 Niveles: CRÍTICO, ALTO, MEDIO. Ordena de mayor a menor relevancia.""")
-
+ 
 print("  → Fechas críticas...")
 r_dates = ask(f"""Lista los 10 eventos y fechas críticas para los próximos 4 meses en Centroamérica relevantes para el Banco Mundial. Formato exacto:
 DÍA|MES|CATEGORÍA|TÍTULO|DESCRIPCIÓN BREVE DEL IMPACTO PARA BM|NIVEL
 Niveles: CRÍTICO, ALTO, MEDIO. Ordena cronológicamente.""")
-
+ 
 print("  → Briefing ejecutivo...")
 r_briefing = ask(f"""Escribe un briefing ejecutivo de HOY sobre Centroamérica para el Banco Mundial. Incluye:
 1. La situación más crítica del momento con fecha y lugar exacto
@@ -179,16 +181,16 @@ r_briefing = ask(f"""Escribe un briefing ejecutivo de HOY sobre Centroamérica p
 4. Evento político más relevante de la semana
 5. Recomendación operacional para equipos en terreno
 Texto limpio, sin asteriscos. Máximo 280 palabras. Cita fuentes y fechas.""")
-
+ 
 print("  → Análisis de riesgo...")
 r_risk_analysis = ask(f"""Genera análisis detallado de riesgo para Centroamérica. Para cada categoría una línea:
 CATEGORÍA|NIVEL|ANÁLISIS DETALLADO (4-5 oraciones con eventos específicos de esta semana, tendencias y proyección)|PAÍS MÁS AFECTADO
 Categorías: OPERACIONAL, POLÍTICO, CLIMÁTICO, SOCIAL/CRISIS, SEGURIDAD""")
-
+ 
 # Parse data
 alerts = parse_news(r_alerts)
 news   = parse_news(r_news)
-
+ 
 # Risk card texts
 rc = {"OPERACIONAL": "Sin datos", "POLÍTICO": "Sin datos", "CLIMÁTICO": "Sin datos",
       "SOCIAL": "Sin datos", "SEGURIDAD": "Sin datos"}
@@ -196,7 +198,7 @@ for line in r_risk["text"].split("\n"):
     for k in rc:
         if line.startswith(k + ":"):
             rc[k] = line[len(k)+1:].strip()
-
+ 
 # Risk analysis
 risk_cards_html = ""
 icons = {"OPERACIONAL":"⚙️","POLÍTICO":"🏛️","CLIMÁTICO":"🌧️","SOCIAL/CRISIS":"✊","SEGURIDAD":"🛡️"}
@@ -212,14 +214,14 @@ for line in r_risk_analysis["text"].split("\n"):
   <div class="rmc-head"><div class="rmc-title">{ico} {cat}</div><span class="nb {cls}">{nivel}</span></div>
   <div class="rmc-body"><p>{analisis}</p><div class="rmc-country">País más afectado: {pais}</div></div>
 </div>'''
-
+ 
 # Dates
 dates_html = ""
 for line in r_dates["text"].split("\n"):
     if "|" not in line: continue
     parts = [p.strip().lstrip("0123456789.) ") for p in line.split("|")]
     dates_html += date_item(parts)
-
+ 
 # News lists
 alerts_html  = "".join(news_card(a, True)  for a in alerts[:8])  or "<p style='padding:16px;color:#9ca3af'>Sin alertas recientes</p>"
 news_html    = "".join(news_card(n, True)  for n in news[:12])   or "<p style='padding:16px;color:#9ca3af'>Sin noticias recientes</p>"
@@ -232,13 +234,13 @@ for line in r_dates["text"].split("\n")[:4]:
     if "|" not in line: continue
     parts = [p.strip().lstrip("0123456789.) ") for p in line.split("|")]
     dash_dates_html += date_item(parts)
-
+ 
 alert_count = len(alerts)
 all_sources_alerts = sources_html(r_alerts["sources"])
 all_sources_news   = sources_html(r_news["sources"])
 briefing_text = r_briefing["text"]
 briefing_sources = sources_html(r_briefing["sources"])
-
+ 
 # ─── COUNTRY CONTEXTS (static, rich) ─────────────────────────────────────────
 COUNTRY_CTX = {
     "Guatemala": {
@@ -278,7 +280,7 @@ COUNTRY_CTX = {
         "geo":"""El Canal de Panamá es la infraestructura estratégica más importante del hemisferio. La Carretera Panamericana termina en el Darién. Darién: selva densa, sin carreteras, grupos armados irregulares."""
     }
 }
-
+ 
 def country_section(name, data):
     badge_color = {"crit":"#dc2626","alto":"#d97706","med":"#2563eb","low":"#16a34a"}.get(data["badge"],"#6b7280")
     return f'''<div class="country-section" id="country-{name.replace(' ','-').replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')}">
@@ -295,9 +297,9 @@ def country_section(name, data):
   <div class="ctx-box ctx-full"><h4>🗺 Geografía y logística</h4><p>{data["geo"]}</p></div>
 </div>
 </div>'''
-
+ 
 countries_html = "".join(country_section(name, data) for name, data in COUNTRY_CTX.items())
-
+ 
 # ─── ACTORS (static) ──────────────────────────────────────────────────────────
 ACTORS = [
     {"cat":"mov","name":"CODECA","flag":"🇬🇹","level":"crit","type":"Movimiento social campesino — Guatemala",
@@ -353,7 +355,7 @@ ACTORS = [
      "ctx":"Demanda ante CIADI activa. Frente Anti-Minero en alerta. Gobierno bajo presión.",
      "links":[("firstquantum.com","https://www.first-quantum.com")]},
 ]
-
+ 
 def actor_html(a):
     color = {"crit":"#dc2626","alto":"#d97706","med":"#2563eb","low":"#16a34a"}.get(a["level"],"#6b7280")
     badge_cls = "nb " + a["level"]
@@ -374,12 +376,12 @@ def actor_html(a):
   <div class="{ctx_cls}">{a["ctx"]}</div>
   {links_html}
 </div>'''
-
+ 
 actors_html = "".join(actor_html(a) for a in ACTORS)
-
+ 
 # ─── GENERATE HTML ────────────────────────────────────────────────────────────
 print("🎨 Generando HTML...")
-
+ 
 HTML = f'''<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -400,7 +402,7 @@ HTML = f'''<!DOCTYPE html>
   --mono:'JetBrains Mono','Courier New',monospace;
 }}
 body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:14px;display:flex;height:100vh;overflow:hidden}}
-
+ 
 /* SIDEBAR */
 .sb{{width:210px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow-y:auto}}
 .sb::-webkit-scrollbar{{width:3px}}.sb::-webkit-scrollbar-thumb{{background:#374151}}
@@ -430,7 +432,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .sb-footer p{{font-size:10px;color:#4b5563;line-height:1.7;font-family:var(--mono)}}
 .sb-footer b{{color:#6b7280}}
 .sb-ts{{font-size:10px;color:#34d399;font-family:var(--mono);margin-top:6px}}
-
+ 
 /* MAIN */
 .main{{flex:1;display:flex;flex-direction:column;overflow:hidden}}
 .topbar{{background:white;border-bottom:1px solid var(--g200);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}}
@@ -441,7 +443,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .timer-chip{{display:flex;align-items:center;gap:6px;background:var(--g100);border:1px solid var(--g200);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--g500);font-family:var(--mono)}}
 .tbar{{width:60px;height:3px;background:var(--g200);border-radius:2px;overflow:hidden}}
 .tfill{{height:100%;background:#3b82f6;border-radius:2px;transition:width 1s linear}}
-
+ 
 /* PAGES */
 .page{{display:none;flex:1;overflow-y:auto}}
 .page.active{{display:block}}
@@ -450,7 +452,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .ph h2{{font-size:20px;font-weight:700;color:var(--g900)}}
 .ph p{{font-size:11px;color:var(--g400);margin-top:2px;font-family:var(--mono)}}
 .ph a{{font-size:12px;color:var(--blue);cursor:pointer;text-decoration:none}}
-
+ 
 /* KPI */
 .kpi-row{{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}}
 .kpi{{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px}}
@@ -458,7 +460,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .kpi-v.red{{color:var(--red)}} .kpi-v.amber{{color:var(--amber)}} .kpi-v.green{{color:var(--green)}} .kpi-v.blue{{color:var(--blue)}}
 .kpi-l{{font-size:11px;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.05em}}
 .kpi-s{{font-size:11px;color:var(--g500);margin-top:4px}}
-
+ 
 /* RISK CARDS */
 .rc-row{{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}}
 .rc{{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;text-decoration:none;display:block}}
@@ -469,7 +471,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .rc-level.med{{background:var(--bbg);color:var(--blue);border:1px solid var(--bborder)}}
 .rc h3{{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:6px}}
 .rc p{{font-size:12px;color:var(--g500);line-height:1.5}}
-
+ 
 /* NEWS CARDS */
 .nb.crit{{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}}
 .nb.alto{{background:var(--abg);color:var(--amber);border:1px solid var(--aborder)}}
@@ -492,31 +494,31 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .nc-loc{{font-size:11px;color:var(--g400)}}
 .nc-date{{font-size:11px;color:var(--g400);font-family:var(--mono)}}
 .nc-src{{font-size:11px;font-weight:600;color:var(--blue)}}
-
+ 
 /* SOURCES */
 .sources{{margin-top:14px;padding-top:12px;border-top:1px solid var(--g100)}}
 .src-label{{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;font-family:var(--mono)}}
 .src-link{{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--g100);border:1px solid var(--g200);border-radius:6px;margin-bottom:5px;text-decoration:none;color:var(--blue);font-size:12px;transition:all .12s}}
 .src-link:hover{{background:var(--bbg);border-color:var(--bborder)}}
-
+ 
 /* FILTER BAR */
 .fbar{{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}}
 .fb{{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--g300);background:white;color:var(--g600);transition:all .12s}}
 .fb:hover{{border-color:#93c5fd;color:var(--blue)}}
 .fb.on{{background:var(--blue);color:white;border-color:var(--blue)}}
-
+ 
 /* AI BOX */
 .ai-box{{background:white;border:1px solid var(--g200);border-radius:10px;margin-bottom:14px;overflow:hidden}}
 .ai-top{{padding:11px 18px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}}
 .ai-chip{{font-size:10px;background:var(--blue);color:white;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-weight:700;letter-spacing:.04em}}
 .ai-ts{{font-size:10px;color:var(--g300);font-family:var(--mono)}}
 .ai-body{{padding:18px 20px;font-size:13px;color:var(--g700);line-height:1.8}}
-
+ 
 /* LAYOUT */
 .two-col{{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}}
 .three-col{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}}
 @media(max-width:1000px){{.two-col,.three-col,.kpi-row,.rc-row{{grid-template-columns:1fr 1fr}}}}
-
+ 
 /* RISK MATRIX */
 .rmc{{background:white;border:1px solid var(--g200);border-radius:10px;overflow:hidden;margin-bottom:12px}}
 .rmc-head{{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g100)}}
@@ -524,7 +526,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .rmc-body{{padding:12px 16px}}
 .rmc-body p{{font-size:13px;color:var(--g600);line-height:1.7;margin-bottom:6px}}
 .rmc-country{{font-size:11px;color:var(--g400);font-family:var(--mono)}}
-
+ 
 /* COUNTRIES */
 .country-section{{margin-bottom:28px}}
 .country-hero{{display:flex;align-items:center;gap:16px;background:white;border:1px solid var(--g200);border-radius:10px;padding:18px 20px;margin-bottom:14px}}
@@ -536,7 +538,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .ctx-full{{grid-column:1/-1}}
 .ctx-box h4{{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:8px;display:flex;align-items:center;gap:6px}}
 .ctx-box p{{font-size:13px;color:var(--g600);line-height:1.8}}
-
+ 
 /* DATES */
 .di{{background:white;border:1px solid var(--g200);border-left:4px solid transparent;border-radius:10px;padding:14px 16px;display:flex;gap:14px;margin-bottom:8px}}
 .di.crit{{border-left-color:var(--red)}}
@@ -549,7 +551,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .di-title{{font-size:13px;font-weight:600;color:var(--g900);margin-bottom:3px}}
 .di-desc{{font-size:12px;color:var(--g500);line-height:1.5;margin-bottom:5px}}
 .di-meta{{display:flex;gap:6px;flex-wrap:wrap}}
-
+ 
 /* ACTORS */
 .actor-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}}
 .actor-card{{background:white;border:1px solid var(--g200);border-radius:10px;padding:16px;transition:all .15s}}
@@ -565,7 +567,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .actor-links{{display:flex;gap:6px;flex-wrap:wrap}}
 .actor-link{{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--bbg);color:#1d4ed8;border:1px solid var(--bborder);text-decoration:none;font-family:var(--mono);transition:background .1s}}
 .actor-link:hover{{background:var(--bborder)}}
-
+ 
 /* CONFIG */
 .cfg-card{{background:white;border:1px solid var(--g200);border-radius:10px;padding:20px;margin-bottom:14px}}
 .cfg-card h3{{font-size:15px;font-weight:700;margin-bottom:6px}}
@@ -580,14 +582,14 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
 .qbtn{{padding:8px 16px;border-radius:7px;background:var(--blue);color:white;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}}
 .qbtn:hover{{background:#1d4ed8}}
 .qresult{{margin-top:10px}}
-
+ 
 ::-webkit-scrollbar{{width:5px;height:5px}}
 ::-webkit-scrollbar-track{{background:transparent}}
 ::-webkit-scrollbar-thumb{{background:var(--g300);border-radius:3px}}
 </style>
 </head>
 <body>
-
+ 
 <!-- SIDEBAR -->
 <nav class="sb">
   <div class="sb-top">
@@ -597,7 +599,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
     </div>
     <div class="sb-alive"><div class="alive-dot"></div><span class="sb-alive-txt">SISTEMA ATIVO</span></div>
   </div>
-
+ 
   <div class="sb-sec">Monitoramento</div>
   <div class="nav-item active" onclick="goPage('dashboard',this)"><div class="nav-left"><span class="nav-icon">◈</span>Dashboard</div></div>
   <div class="nav-item" onclick="goPage('risk',this)"><div class="nav-left"><span class="nav-icon">⚡</span>Análise de Risco</div></div>
@@ -606,7 +608,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
   <div class="nav-item" onclick="goPage('actors',this)"><div class="nav-left"><span class="nav-icon">👥</span>Atores</div></div>
   <div class="nav-item" onclick="goPage('dates',this)"><div class="nav-left"><span class="nav-icon">📅</span>Datas Críticas</div></div>
   <div class="nav-item" onclick="goPage('countries',this)"><div class="nav-left"><span class="nav-icon">🌎</span>Por País</div></div>
-
+ 
   <div class="sb-sec">Países</div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Guatemala')"><div class="nav-left">🇬🇹 Guatemala</div><span class="nb alto">Alto</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('El-Salvador')"><div class="nav-left">🇸🇻 El Salvador</div><span class="nb crit">Crítico</span></div>
@@ -614,16 +616,16 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Nicaragua')"><div class="nav-left">🇳🇮 Nicaragua</div><span class="nb crit">Crítico</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Costa-Rica')"><div class="nav-left">🇨🇷 Costa Rica</div><span class="nb low">Bajo</span></div>
   <div class="nav-item" onclick="goPage('countries',this);scrollCountry('Panama')"><div class="nav-left">🇵🇦 Panamá</div><span class="nb med">Medio</span></div>
-
+ 
   <div class="sb-sec">Sistema</div>
   <div class="nav-item" onclick="goPage('config',this)"><div class="nav-left"><span class="nav-icon">⚙</span>Configuração</div></div>
-
+ 
   <div class="sb-footer">
     <p>Motor: <b>Gemini AI</b><br>Intervalo: <b>2x/día (auto)</b><br>Países: <b>6</b><br>Fuente: <b>Google Search</b></p>
     <div class="sb-ts">Actualizado: {DATE_LABEL}</div>
   </div>
 </nav>
-
+ 
 <!-- MAIN -->
 <div class="main">
 <div class="topbar">
@@ -636,7 +638,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
     <div class="timer-chip"><div class="alive-dot"></div>Próx. actualización <b id="cd">15:00</b><div class="tbar"><div class="tfill" id="tf" style="width:100%"></div></div></div>
   </div>
 </div>
-
+ 
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard"><div class="pi">
   <div class="kpi-row">
@@ -646,7 +648,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
     <div class="kpi"><div class="kpi-v blue">6</div><div class="kpi-l">Países cubiertos</div><div class="kpi-s">Cobertura total</div></div>
     <div class="kpi"><div class="kpi-v green">✓</div><div class="kpi-l">Gemini AI</div><div class="kpi-s">Activo · gratis</div></div>
   </div>
-
+ 
   <div class="rc-row">
     <div class="rc" onclick="goPage('risk',document.querySelectorAll('.nav-item')[1])">
       <div class="rc-level alto">ALTO · Operacional</div><h3>Infraestructura y operaciones</h3><p>{rc["OPERACIONAL"]}</p>
@@ -664,7 +666,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
       <div class="rc-level alto">ALTO · Seguridad</div><h3>Seguridad y crimen</h3><p>{rc["SEGURIDAD"]}</p>
     </div>
   </div>
-
+ 
   <div class="two-col">
     <div>
       <div class="ai-box">
@@ -684,14 +686,14 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
     </div>
   </div>
 </div></div>
-
+ 
 <!-- RISK -->
 <div class="page" id="page-risk"><div class="pi">
   <div class="ph"><div><h2>Análisis de riesgo</h2><p>Matriz consolidada por categoría · Últimos 7 días</p></div></div>
   {risk_cards_html}
   {sources_html(r_risk_analysis["sources"])}
 </div></div>
-
+ 
 <!-- ALERTS -->
 <div class="page" id="page-alerts"><div class="pi">
   <div class="ph"><div><h2>Alertas activas</h2><p>{alert_count} alertas · Últimos 7 días · clic en cada alerta para ir a la fuente</p></div></div>
@@ -706,7 +708,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
   <div id="alerts-list">{alerts_html}</div>
   {all_sources_alerts}
 </div></div>
-
+ 
 <!-- NEWS -->
 <div class="page" id="page-news"><div class="pi">
   <div class="ph"><div><h2>Noticias</h2><p>Monitoreo de noticias relevantes · clic en cada noticia para leer la fuente completa</p></div></div>
@@ -721,7 +723,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
   <div id="news-list">{news_html}</div>
   {all_sources_news}
 </div></div>
-
+ 
 <!-- ACTORS -->
 <div class="page" id="page-actors"><div class="pi">
   <div class="ph"><div><h2>Actores clave</h2><p>Quiénes son, por qué importan para el BM y cómo seguirlos · links directos</p></div></div>
@@ -734,20 +736,20 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
   </div>
   <div class="actor-grid" id="actors-grid">{actors_html}</div>
 </div></div>
-
+ 
 <!-- DATES -->
 <div class="page" id="page-dates"><div class="pi">
   <div class="ph"><div><h2>Fechas críticas 2026</h2><p>Calendario de eventos, movilizaciones y riesgos operacionales</p></div></div>
   {dates_html}
   {sources_html(r_dates["sources"])}
 </div></div>
-
+ 
 <!-- COUNTRIES -->
 <div class="page" id="page-countries"><div class="pi">
   <div class="ph"><div><h2>Monitor por país</h2><p>Contexto político, seguridad y geografía operacional</p></div></div>
   {countries_html}
 </div></div>
-
+ 
 <!-- CONFIG -->
 <div class="page" id="page-config"><div class="pi">
   <div class="ph"><div><h2>Configuração</h2><p>Cómo funciona el sistema de actualización automática</p></div></div>
@@ -764,10 +766,10 @@ body{{font-family:var(--font);background:var(--bg);color:var(--g800);font-size:1
     <p>Fecha: <b>{DATE_LABEL}</b><br>Modelo: <b>{MODEL}</b><br>Alertas generadas: <b>{alert_count}</b><br>Noticias generadas: <b>{len(news)}</b></p>
   </div>
 </div></div>
-
+ 
 </div><!-- main -->
 </div><!-- body -->
-
+ 
 <script>
 const TOTAL=900;let rem=TOTAL;
 const PAGE_META={{
@@ -780,7 +782,7 @@ const PAGE_META={{
   countries:{{title:'Por País',sub:'Contexto político, seguridad y geografía operacional'}},
   config:{{title:'Configuração',sub:'Cómo funciona el sistema de actualización automática'}},
 }};
-
+ 
 function goPage(id,el){{
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
@@ -790,14 +792,14 @@ function goPage(id,el){{
   document.getElementById('page-title').textContent=m.title||id;
   document.getElementById('page-sub').textContent=m.sub||'';
 }}
-
+ 
 function scrollCountry(id){{
   setTimeout(()=>{{
     const el=document.getElementById('country-'+id);
     if(el)el.scrollIntoView({{behavior:'smooth',block:'start'}});
   }},100);
 }}
-
+ 
 function filterCards(listId,cat,btn){{
   const container=document.getElementById(listId+'-list');
   if(!container)return;
@@ -810,7 +812,7 @@ function filterCards(listId,cat,btn){{
     card.style.display=match?'block':'none';
   }});
 }}
-
+ 
 function filterActors(cat,btn){{
   document.querySelectorAll('#actor-filter .fb,.fbar .fb').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
@@ -818,7 +820,7 @@ function filterActors(cat,btn){{
     card.style.display=(cat==='all'||card.dataset.cat===cat)?'block':'none';
   }});
 }}
-
+ 
 function pad(n){{return String(n).padStart(2,'0')}}
 function tick(){{
   rem--;
@@ -830,10 +832,11 @@ setInterval(tick,1000);
 </script>
 </body>
 </html>'''
-
+ 
 # ─── WRITE FILE ───────────────────────────────────────────────────────────────
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(HTML)
-
+ 
 print(f"✅ index.html generado ({len(HTML):,} caracteres)")
 print(f"   Alertas: {len(alerts)} | Noticias: {len(news)} | Fuentes: {len(r_alerts['sources'])+len(r_news['sources'])}")
+ 
